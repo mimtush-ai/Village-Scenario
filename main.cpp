@@ -1208,7 +1208,7 @@ void update(int value)
     if (planeActive)
     {
         planeX += planeDir * 1.2f;
-        planeY += 0.15f;   // removed planeDir — always drifts upward
+        planeY += 0.15f;   // removed planeDir ï¿½ always drifts upward
 
         if (planeScale > 0.08f)
             planeScale -= 0.0012f;   // faster shrink so zoom-out is visible
