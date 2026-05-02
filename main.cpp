@@ -64,19 +64,6 @@ int lightningMode = 0;   // 0 = OFF, 1 = AUTO blinking
 int lightningVisible = 0;
 int lightningCounter = 0;
 
-float boat3X     = 420.0f;
-float boat3Y     = 112.0f;
-float boat3Scale = 1.4f;
-int   boat3State = 0;
-float boat3Speed = 0.4f;
-
-const float BOAT3_START_X = 420.0f;
-const float BOAT3_START_Y = 112.0f;
-const float BOAT3_START_S = 1.4f;
-const float BOAT3_END_X   = 460.0f;   // slight rightward drift
-const float BOAT3_END_Y   = 206.0f;
-const float BOAT3_END_S   = 0.75f;    // stays clearly visible, not too small
-
 void init()
 {
     glClearColor(0.53f, 0.81f, 0.98f, 1.0f);
@@ -1082,17 +1069,6 @@ void keyboard(unsigned char key, int x, int y)
         lightningVisible = 0;
         break;
 
-
-    case '[':   // boat3 departs toward far bank
-        if (boat3State == 0)
-            boat3State = 1;
-        break;
-
-    case ']':   // boat3 returns to grass bank
-        if (boat3State == 2)
-            boat3State = 3;
-        break;
-
     }
 
     glutPostRedisplay();
@@ -1159,15 +1135,9 @@ void update(int value)
             boatDir = 1;
         }
 
-        if (boat3State == 1 || boat3State == 2)
+        if (boatX > 420.0f)
         {
-            if (boatX > 280.0f)
-                boatDir = -1;
-        }
-        else
-        {
-            if (boatX > 420.0f)
-                boatDir = -1;
+            boatDir = -1;
         }
     }
 
@@ -1268,38 +1238,6 @@ void update(int value)
         skyG = 0.81f;
         skyB = 0.98f;
     }
-
-    if (boat3State == 1)
-    {
-        float t = (boat3Y - BOAT3_START_Y) / (BOAT3_END_Y - BOAT3_START_Y);
-        boat3Y    += boat3Speed * 0.5f;
-        boat3X     = BOAT3_START_X + t * (BOAT3_END_X - BOAT3_START_X);
-        boat3Scale = BOAT3_START_S + t * (BOAT3_END_S - BOAT3_START_S);
-
-        if (boat3Y >= BOAT3_END_Y)
-        {
-            boat3Y     = BOAT3_END_Y;
-            boat3X     = BOAT3_END_X;
-            boat3Scale = BOAT3_END_S;
-            boat3State = 2;
-        }
-    }
-    else if (boat3State == 3)
-    {
-        float t = (boat3Y - BOAT3_END_Y) / (BOAT3_START_Y - BOAT3_END_Y);
-        boat3Y    -= boat3Speed * 0.5f;
-        boat3X     = BOAT3_END_X + t * (BOAT3_START_X - BOAT3_END_X);
-        boat3Scale = BOAT3_END_S + t * (BOAT3_START_S - BOAT3_END_S);
-
-        if (boat3Y <= BOAT3_START_Y)
-        {
-            boat3Y     = BOAT3_START_Y;
-            boat3X     = BOAT3_START_X;
-            boat3Scale = BOAT3_START_S;
-            boat3State = 0;
-        }
-    }
-
 
     glutPostRedisplay();
     glutTimerFunc(16, update, 0);
@@ -1634,52 +1572,6 @@ void drawPlane()
         glEnd();
     }
 
-}
-
-void drawBoat3()
-{
-    // Hull — simple trapezoid boat shape
-    glColor3ub(92, 64, 51);
-    glBegin(GL_POLYGON);
-    glVertex2f(-28,  0);
-    glVertex2f( 28,  0);
-    glVertex2f( 22,  9);
-    glVertex2f(-22,  9);
-    glEnd();
-
-    // Upper rim (lighter wood)
-    glColor3ub(139, 90, 43);
-    glBegin(GL_POLYGON);
-    glVertex2f(-28,  7);
-    glVertex2f( 28,  7);
-    glVertex2f( 24, 10);
-    glVertex2f(-24, 10);
-    glEnd();
-
-    // Mast
-    glColor3ub(101, 67, 33);
-    glBegin(GL_POLYGON);
-    glVertex2f(-1.5f, 10);
-    glVertex2f( 1.5f, 10);
-    glVertex2f( 1.5f, 50);
-    glVertex2f(-1.5f, 50);
-    glEnd();
-
-    // Sail
-    glColor3ub(255, 255, 200);
-    glBegin(GL_TRIANGLES);
-    glVertex2f( 1.5f, 50);
-    glVertex2f( 1.5f, 14);
-    glVertex2f(26.0f, 28);
-    glEnd();
-
-    // Sail shadow/depth
-    glColor3ub(220, 200, 130);
-    glBegin(GL_TRIANGLES);
-    glVertex2f( 1.5f, 50);
-    glVertex2f( 1.5f, 14);
-    glVertex2f(-18.0f, 30);
-    glEnd();
 }
 
 
@@ -2614,12 +2506,6 @@ void display()
     drawRealisticBoat(350, 140);
     glPopMatrix();
 
-    // Boat 3 — perspective crossing (draw before top stones so far bank covers it)
-    glPushMatrix();
-    glTranslatef(boat3X, boat3Y, 0.0f);
-    glScalef(boat3Scale, boat3Scale, 1.0f);
-    drawBoat3();
-    glPopMatrix();
 
     drawTent();
     drawWood();
